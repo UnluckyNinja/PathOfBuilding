@@ -48,7 +48,11 @@ If possible, change the game version in the Configuration tab before importing.]
 			end)
 		end)
 	end
-	self.controls.accountNameGo = common.New("ButtonControl", {"LEFT",self.controls.accountName,"RIGHT"}, 8, 0, 60, 20, "Start", function()
+
+	-- Region options
+	self.controls.accountRegion = common.New("DropDownControl", {"LEFT",self.controls.accountName,"RIGHT"}, 4, 0, 80, 20, { "GGG", "Tencent" })
+
+	self.controls.accountNameGo = common.New("ButtonControl", {"LEFT",self.controls.accountRegion,"RIGHT"}, 8, 0, 60, 20, "Start", function()
 		self.controls.sessionInput.buf = ""
 		self:DownloadCharacterList()
 	end)
@@ -255,7 +259,14 @@ function ImportTabClass:DownloadCharacterList()
 	self.charImportStatus = "Retrieving character list..."
 	local accountName = self.controls.accountName.buf
 	local sessionID = #self.controls.sessionInput.buf == 32 and self.controls.sessionInput.buf or main.accountSessionIDs[accountName]
-	launch:DownloadPage("https://www.pathofexile.com/character-window/get-characters?accountName="..accountName, function(page, errMsg)
+
+	-- Region API determination
+	local getCharsApi = "https://www.pathofexile.com/character-window/get-characters?accountName="
+	if self.controls.accountRegion.selIndex == 2 then
+		getCharsApi = "https://poe.game.qq.com/character-window/get-characters?accountName="
+	end
+
+	launch:DownloadPage(getCharsApi..accountName, function(page, errMsg)
 		if errMsg == "Response code: 403" then
 			self.charImportStatus = colorCodes.NEGATIVE.."Account profile is private."
 			self.charImportMode = "GETSESSIONID"
@@ -281,9 +292,16 @@ function ImportTabClass:DownloadCharacterList()
 			self.charImportMode = "GETACCOUNTNAME"
 			return
 		end
+
+		-- Region API determination
+		local getProfileApi = "https://www.pathofexile.com/account/view-profile/"
+		if self.controls.accountRegion.selIndex == 2 then
+			getProfileApi = "https://poe.game.qq.com/account/view-profile/"
+		end
+
 		-- GGG's character API has an issue where for /get-characters the account name is not case-sensitive, but for /get-passive-skills and /get-items it is.
 		-- This workaround grabs the profile page and extracts the correct account name from one of the URLs.
-		launch:DownloadPage("https://www.pathofexile.com/account/view-profile/"..accountName, function(page, errMsg)
+		launch:DownloadPage(getProfileApi..accountName, function(page, errMsg)
 			if errMsg then
 				self.charImportStatus = colorCodes.NEGATIVE.."Error retrieving character list, try again ("..errMsg:gsub("\n"," ")..")"
 				self.charImportMode = "GETACCOUNTNAME"
@@ -324,7 +342,14 @@ function ImportTabClass:DownloadPassiveTree()
 	local sessionID = #self.controls.sessionInput.buf == 32 and self.controls.sessionInput.buf or main.accountSessionIDs[accountName]
 	local charSelect = self.controls.charSelect
 	local charData = charSelect.list[charSelect.selIndex].char
-	launch:DownloadPage("https://www.pathofexile.com/character-window/get-passive-skills?accountName="..accountName.."&character="..charData.name, function(page, errMsg)
+
+	-- Region API determination
+	local getPassivesApi = "https://www.pathofexile.com/character-window/get-passive-skills?accountName="
+	if self.controls.accountRegion.selIndex == 2 then
+		getPassivesApi = "https://poe.game.qq.com/character-window/get-passive-skills?accountName="
+	end
+
+	launch:DownloadPage(getPassivesApi..accountName.."&character="..charData.name, function(page, errMsg)
 		self.charImportMode = "SELECTCHAR"
 		if errMsg then
 			self.charImportStatus = colorCodes.NEGATIVE.."Error importing character data, try again ("..errMsg:gsub("\n"," ")..")"
@@ -371,7 +396,14 @@ function ImportTabClass:DownloadItems()
 	local sessionID = #self.controls.sessionInput.buf == 32 and self.controls.sessionInput.buf or main.accountSessionIDs[accountName]
 	local charSelect = self.controls.charSelect
 	local charData = charSelect.list[charSelect.selIndex].char
-	launch:DownloadPage("https://www.pathofexile.com/character-window/get-items?accountName="..accountName.."&character="..charData.name, function(page, errMsg)
+
+	-- Region API determination
+	local getItemsApi = "https://www.pathofexile.com/character-window/get-items?accountName="
+	if self.controls.accountRegion.selIndex == 2 then
+		getItemsApi = "https://poe.game.qq.com/character-window/get-items?accountName="
+	end
+
+	launch:DownloadPage(getItemsApi..accountName.."&character="..charData.name, function(page, errMsg)
 		self.charImportMode = "SELECTCHAR"
 		if errMsg then
 			self.charImportStatus = colorCodes.NEGATIVE.."Error importing character data, try again ("..errMsg:gsub("\n"," ")..")"

@@ -1,4 +1,18 @@
-# Path of Building
+# Path of Building 国服支持 - In Development
+
+目标是支持将国服角色数据导入到PoB中
+由于GUI引擎为作者自开发且未开源（SimpleGraphic.dll），只能显示自带的tga字体文件，不清楚其工作方式，故本人不考虑其汉化
+
+使用方法：
+1. 下载官方release版并安装： https://github.com/Openarl/PathOfBuilding/releases/latest
+2. clone此repo，并切换到CN-server-import分支：`git clone -b CN-server-import https://github.com/Openarl/PathOfBuilding.git`。
+3. 复制release版目录下的 TreeData 文件夹到 repo 目录下
+4. 为 Path of Building.exe 创建快捷方式，在属性中目标尾部添加 repo 内 Launch.lua 的路径，例如 `"C:\Program Files (x86)\Path of Building\Path of Building.exe" "C:\PathOfBuilding\Launch.lua"`，即可加载repo代码运行程序
+
+软件中按F5可以快速重新加载代码，按Ctrl+\`可以显示控制台。
+
+v0.1
+可以导入国服的天赋树，但技能和物品还无法识别
 
 Welcome to Path of Building, an offline build planner for Path of Exile!
 ## Features
